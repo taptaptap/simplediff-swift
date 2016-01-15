@@ -43,6 +43,20 @@ struct Operation<T> {
             }
         }
     }
+   
+    /// Length of the difference.
+    var delta: Int {
+        get {
+            switch type {
+            case .Insert:
+                return elementsString.characters.count
+            case .Delete:
+                return elementsString.characters.count
+            default:
+                return 0
+            }
+        }
+    }
 }
 
 /// diff finds the difference between two lists.
