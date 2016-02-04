@@ -23,7 +23,7 @@ enum OperationType {
 }
 
 /// Operation describes an operation (insertion, deletion, or noop) of elements.
-struct Operation<T> {
+struct DiffOperation<T> {
     let type: OperationType
     let elements: [T]
     
@@ -65,7 +65,7 @@ struct Operation<T> {
 /// :param: before Old list of elements.
 /// :param: after New list of elements
 /// :returns: A list of operation (insert, delete, noop) to transform the list *before* to the list *after*.
-func diff<T where T: Equatable, T: Hashable>(before: [T], after: [T]) -> [Operation<T>] {
+func diff<T where T: Equatable, T: Hashable>(before: [T], after: [T]) -> [DiffOperation<T>] {
     // Create map of indices for every element
     var beforeIndices = [T: [Int]]()
     for (index, elem) in before.enumerate() {
@@ -99,20 +99,20 @@ func diff<T where T: Equatable, T: Hashable>(before: [T], after: [T]) -> [Operat
         overlay = _overlay
     }
     
-    var operations = [Operation<T>]()
+    var operations = [DiffOperation<T>]()
     if maxOverlayLength == 0 {
          // No overlay; remove before and add after elements
         if before.count > 0 {
-            operations.append(Operation(type: .Delete, elements: before))
+            operations.append(DiffOperation(type: .Delete, elements: before))
         }
         if after.count > 0 {
-            operations.append(Operation(type: .Insert, elements: after))
+            operations.append(DiffOperation(type: .Insert, elements: after))
         }
     } else {
         // Recursive call with elements before overlay
         operations += diff(Array(before[0..<beforeStart]), after: Array(after[0..<afterStart]))
         // Noop for longest overlay
-        operations.append(Operation(type: .Noop, elements: Array(after[afterStart..<afterStart+maxOverlayLength])))
+        operations.append(DiffOperation(type: .Noop, elements: Array(after[afterStart..<afterStart+maxOverlayLength])))
         // Recursive call with elements after overlay
         operations += diff(Array(before[beforeStart+maxOverlayLength..<before.count]), after: Array(after[afterStart+maxOverlayLength..<after.count]))
     }
