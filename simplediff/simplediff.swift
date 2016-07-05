@@ -28,7 +28,7 @@ struct DiffOperation<T> {
     let elements: [T]
     
     var elementsString: String {
-        return (elements.map { "\($0)" }).joinWithSeparator(" ")
+        return (elements.map { "\($0)" }).joined(separator: " ")
     }
     
     var description: String {
@@ -68,8 +68,8 @@ struct DiffOperation<T> {
 func diff<T where T: Equatable, T: Hashable>(before: [T], after: [T]) -> [DiffOperation<T>] {
     // Create map of indices for every element
     var beforeIndices = [T: [Int]]()
-    for (index, elem) in before.enumerate() {
-        var indices = beforeIndices.indexForKey(elem) != nil ? beforeIndices[elem]! : [Int]()
+    for (index, elem) in before.enumerated() {
+        var indices = beforeIndices.index(forKey: elem) != nil ? beforeIndices[elem]! : [Int]()
         indices.append(index)
         beforeIndices[elem] = indices
     }
@@ -78,7 +78,7 @@ func diff<T where T: Equatable, T: Hashable>(before: [T], after: [T]) -> [DiffOp
     var afterStart = 0
     var maxOverlayLength = 0
     var overlay = [Int: Int]() // remembers *overlayLength* of previous element
-    for (index, elem) in after.enumerate() {
+    for (index, elem) in after.enumerated() {
         var _overlay = [Int: Int]()
          // Element must be in *before* list
         if let elemIndices = beforeIndices[elem] {
@@ -110,11 +110,11 @@ func diff<T where T: Equatable, T: Hashable>(before: [T], after: [T]) -> [DiffOp
         }
     } else {
         // Recursive call with elements before overlay
-        operations += diff(Array(before[0..<beforeStart]), after: Array(after[0..<afterStart]))
+        operations += diff(before: Array(before[0..<beforeStart]), after: Array(after[0..<afterStart]))
         // Noop for longest overlay
         operations.append(DiffOperation(type: .Noop, elements: Array(after[afterStart..<afterStart+maxOverlayLength])))
         // Recursive call with elements after overlay
-        operations += diff(Array(before[beforeStart+maxOverlayLength..<before.count]), after: Array(after[afterStart+maxOverlayLength..<after.count]))
+        operations += diff(before: Array(before[beforeStart+maxOverlayLength..<before.count]), after: Array(after[afterStart+maxOverlayLength..<after.count]))
     }
     return operations
 }
